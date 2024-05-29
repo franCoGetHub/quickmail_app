@@ -13,6 +13,20 @@ def extract_contacts(text):
    emails = re.findall(email_pattern, text)
    return list(set(emails))
 
+def extract_tasks(text):
+    task_pattern = r'(?i)(?:Project Status:|Upcoming Deadlines:|Tasks:|Task:|To Do:|TASK:|TASKS:|To do:|TO DO:)\s*\n((?:\s*[\dA-Za-z.-]+\.\s*(?:.*?\n)+)+)'
+    tasks = re.findall(task_pattern, text)
+    if tasks:
+        tasks_text = tasks[0]
+        tasks_text = tasks_text.split("Action Items:")[0]
+        tasks_list = [task.strip() for task in tasks_text.strip().split("\n") if task.strip()]
+        for i in range(len(tasks_list)):
+            tasks_list[i] = tasks_list[i].split(".", 1)[-1].strip()
+        return tasks_list
+    else:
+        return []
+
+
 def summarize_text(text, ratio=0.2):
    sentences = text.split('.')
    clean_sentences = [s.strip().translate(str.maketrans('', '', string.punctuation)) for s in sentences]
@@ -57,6 +71,11 @@ def main():
                    st.subheader("Dates")
                    st.write(", ".join(dates))
 
+               tasks = extract_tasks(email_text)
+               if tasks:
+                    st.subheader("Tasks")
+                    st.write(", ".join(tasks))
+
                contacts = extract_contacts(email_text)
                if contacts:
                    st.subheader("Contacts")
@@ -80,6 +99,11 @@ def main():
                    if dates:
                        st.subheader("Dates")
                        st.write(", ".join(dates))
+                  
+                   tasks = extract_tasks(file_text)
+                   if tasks:
+                    st.subheader("Tasks")
+                    st.write(", ".join(tasks))
 
                    contacts = extract_contacts(file_text)
                    if contacts:
